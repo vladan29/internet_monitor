@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Internet Monitor</string>
+    <string name="check_internet_button">Check internet</string>
 </resources>
