@@ -21,6 +21,7 @@ class AppApplication : Application() {
             return instance.applicationContext
         }
     }
+
     private var isFirstStart: Boolean = true
     private var networkType: Int = -1
     private var networkSubType: Int = -1
@@ -32,7 +33,7 @@ class AppApplication : Application() {
     private var builder: NetworkRequest.Builder? = null
     private var networkRequest: NetworkRequest? = null
     private var isCurrentNetworkLost: Boolean = false
-    private lateinit var wifiManager : WifiManager
+    private lateinit var wifiManager: WifiManager
 
     private var networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onBlockedStatusChanged(network: Network, blocked: Boolean) {
@@ -51,8 +52,9 @@ class AppApplication : Application() {
 
         override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
             super.onLinkPropertiesChanged(network, linkProperties)
-            if (connectivityDispatcher?.getNetworkCapabilities(network)!!.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)){
-              Log.d(TAG,"Link properties: $linkProperties")
+            if (connectivityDispatcher?.getNetworkCapabilities(network)!!
+                    .hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                Log.d(TAG, "Link properties: $linkProperties")
             }
         }
 
@@ -71,7 +73,8 @@ class AppApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
+        wifiManager =
+            getSystemService(Context.WIFI_SERVICE) as WifiManager
         connectivityDispatcher = applicationContext.getSystemService(
             Context.CONNECTIVITY_SERVICE
         ) as ConnectivityManager?
