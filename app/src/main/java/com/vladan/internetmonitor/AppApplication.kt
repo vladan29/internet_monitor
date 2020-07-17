@@ -68,7 +68,52 @@ class AppApplication : Application() {
 
         override fun onAvailable(network: Network) {
             super.onAvailable(network)
+            super.onAvailable(network)
+            availableNetwork = network
+            if (isFirstStart) {
+                currentNetwork = network
+                isConnected = true
+                checkNetworkTypeAndSubtype(network)
+                deliverEvent()
+                isFirstStart = false
+                Log.d(
+                    TAG, "Method: onAvailableFirstStart " +
+                            "\nIs connected: $isConnected  " +
+                            "\nAvailable network: $availableNetwork " +
+                            "\nNetwork type: $networkType " +
+                            "\nNetwork subtype: $networkSubType"
+                )
+            }
+            else {
+                if (isCurrentNetworkLost) {
+                    currentNetwork = network
+                    isConnected = true
+                    isCurrentNetworkLost = false
+                    checkNetworkTypeAndSubtype(network)
+                    deliverEvent()
+                    Log.d(
+                        TAG, "Method: onAvailable " +
+                                "\nIs connected: $isConnected  " +
+                                "\nCurrent network: $currentNetwork " +
+                                "\nNetwork type: $networkType " +
+                                "\nNetwork subtype: $networkSubType"
+                    )
+                }
+                else {
+                    availableNetwork = network
+
+                    Log.d(
+                        TAG, "Method: onAvailablePartTwo " +
+                                "\nAvailable network $availableNetwork " +
+                                "\nCurrent network: $currentNetwork"
+                    )
+                }
+            }
         }
+    }
+
+    init {
+        instance = this
     }
 
     override fun onCreate() {
@@ -87,5 +132,24 @@ class AppApplication : Application() {
 
     private fun deliverEvent() {
 
+    }
+
+    /** This deprecation annotation is only to wait to sdkVersion 30 */
+    @Suppress("DEPRECATION")
+    private fun checkNetworkTypeAndSubtype(network: Network) {
+        if (connectivityDispatcher?.getNetworkCapabilities(network)!!.hasTransport(
+                NetworkCapabilities.TRANSPORT_WIFI
+            )) {
+            networkType = NetworkCapabilities.TRANSPORT_WIFI
+            networkSubType = -1
+        }
+        else if (connectivityDispatcher?.getNetworkCapabilities(
+                network
+            )!!.hasTransport(
+                NetworkCapabilities.TRANSPORT_CELLULAR
+            )) {
+            networkType = NetworkCapabilities.TRANSPORT_CELLULAR
+            networkSubType = connectivityDispatcher?.activeNetworkInfo?.subtype!!
+        }
     }
 }
