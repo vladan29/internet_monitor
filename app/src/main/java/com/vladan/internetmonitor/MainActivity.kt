@@ -16,9 +16,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         button_check_internet.setOnClickListener {
+            object : Thread(){
+                override fun run() {
+                    val ping: ArrayList<String>? = AppUtils.executeCmd("ping -c 3 -q google.com")
+                    Log.d(TAG, "Ping : $ping")
+                }
+            }.start()
 
-            val ping: ArrayList<String>? = AppUtils.executeCmd("ping -c 3 -q google.com")
-            Log.d(TAG, "Ping : $ping")
         }
     }
 }
