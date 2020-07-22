@@ -4,8 +4,10 @@ import android.app.Application
 import android.content.Context
 import android.net.*
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.util.Log
 import org.greenrobot.eventbus.EventBus
+
 /**
  * Created by vladan on 7/15/2020
  */
@@ -25,13 +27,12 @@ class AppApplication : Application() {
     private val aliveNetworks: ArrayList<Network> = arrayListOf()
     private var maxTimeToLive: Int = -1
     private var losingNetwork: Network? = null
-    private var isFirstStart: Boolean = true
     private var networkType: Int = -1
-    private var networkSubType: Int = -1
     private var availableNetwork: Network? = null
-    private var currentNetwork: Network? = null
     private var isConnected: Boolean = false
-    private var isLoosing: Boolean = false
+    private var signalStrength: Int = 1000
+    private var linkDnBandwidth: Int = -1
+    private var linkUpBandwidth: Int = -1
     private var connectivityDispatcher: ConnectivityManager? = null
     private var builder: NetworkRequest.Builder? = null
     private var networkRequest: NetworkRequest? = null
@@ -45,11 +46,39 @@ class AppApplication : Application() {
             //TODO This method works only for API level above 28 (introduced at 29).
         }
 
+        /** Starting with Build.VERSION_CODES.O this method is guaranteed to be called
+         * immediately after onAvailable(Network).*/
         override fun onCapabilitiesChanged(
             network: Network, networkCapabilities: NetworkCapabilities
         ) {
             super.onCapabilitiesChanged(network, networkCapabilities)
-            Log.d(TAG, "Network capabilities: $networkCapabilities")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                isConnected = (networkCapabilities.hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_INTERNET
+                ) && networkCapabilities.hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_VALIDATED
+                ))
+            }
+            if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                networkType = NetworkCapabilities.TRANSPORT_WIFI
+                signalStrength = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    networkCapabilities.signalStrength
+                }
+                else {
+                    wifiManager.connectionInfo.rssi
+                }
+            }
+            else {
+                if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                    networkType = NetworkCapabilities.TRANSPORT_CELLULAR
+
+                }
+            }
+            linkDnBandwidth = networkCapabilities.linkDownstreamBandwidthKbps
+            linkUpBandwidth = networkCapabilities.linkUpstreamBandwidthKbps
+
+            Log.d(TAG, "Network capabilities: $networkCapabilities, IsConnected: $isConnected")
+            deliverEvent()
         }
 
         override fun onLost(network: Network) {
@@ -71,7 +100,16 @@ class AppApplication : Application() {
                         }
                     }
                 }
-            isConnected = aliveNetworks.size > 0
+            if (aliveNetworks.size == 0) {
+                isConnected = false
+                maxTimeToLive = -1
+                networkType = -1
+                availableNetwork = null
+                signalStrength = 1000
+                linkDnBandwidth = -1
+                linkUpBandwidth = -1
+                deliverEvent()
+            }
             Log.d(TAG, "Method onLost isConnected: $isConnected  $aliveNetworks")
         }
 
@@ -109,9 +147,20 @@ class AppApplication : Application() {
 
         override fun onAvailable(network: Network) {
             super.onAvailable(network)
-
             aliveNetworks.add(network)
-            isConnected = true
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                isConnected = true
+                connectivityDispatcher?.getNetworkCapabilities(network)?.let {
+                    if (it.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                        networkType = NetworkCapabilities.TRANSPORT_WIFI
+                    }
+
+                    if (it.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                        networkType = NetworkCapabilities.TRANSPORT_CELLULAR
+                    }
+                    deliverEvent()
+                }
+            }
 
             availableNetwork = network
             Log.d(
@@ -138,29 +187,21 @@ class AppApplication : Application() {
         connectivityDispatcher?.registerNetworkCallback(
             networkRequest!!, networkCallback
         )
+        Log.d(TAG, "Is connected: $isConnected")
     }
 
     private fun deliverEvent() {
         EventBus.getDefault()
-            .postSticky(NetworkState(isConnected, networkType, networkSubType, maxTimeToLive))
+            .postSticky(
+                NetworkState(
+                    isConnected,
+                    networkType,
+                    maxTimeToLive,
+                    signalStrength,
+                    linkDnBandwidth,
+                    linkUpBandwidth
+                )
+            )
     }
 
-    /** This deprecation annotation is only to wait to sdkVersion 30 */
-    @Suppress("DEPRECATION")
-    private fun checkNetworkTypeAndSubtype(network: Network) {
-        if (connectivityDispatcher?.getNetworkCapabilities(network)!!.hasTransport(
-                NetworkCapabilities.TRANSPORT_WIFI
-            )) {
-            networkType = NetworkCapabilities.TRANSPORT_WIFI
-            networkSubType = -1
-        }
-        else if (connectivityDispatcher?.getNetworkCapabilities(
-                network
-            )!!.hasTransport(
-                NetworkCapabilities.TRANSPORT_CELLULAR
-            )) {
-            networkType = NetworkCapabilities.TRANSPORT_CELLULAR
-            networkSubType = connectivityDispatcher?.activeNetworkInfo?.subtype!!
-        }
-    }
 }

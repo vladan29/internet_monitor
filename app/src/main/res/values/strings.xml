@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">Internet Monitor</string>
     <string name="check_internet_button">Check internet</string>
+    <string name="is_connected">Is connected: YES</string>
+    <string name="is_connected_no">Is connected: NO</string>
+    <string name="transport_type_wifi">Transport type: WIFI</string>
+    <string name="transport_type_cellular">Transport type: CELLULAR</string>
+    <string name="link_up_bandwidth">LinkUpBandwidth>=</string>
+    <string name="signal_strength">Signal strength:</string>
+    <string name="link_dn_bandwidth">LinkUpBandwidth>=</string>
 </resources>

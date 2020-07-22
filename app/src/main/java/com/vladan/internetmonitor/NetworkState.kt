@@ -6,6 +6,8 @@ package com.vladan.internetmonitor
 data class NetworkState(
     var isConnected: Boolean,
     var connectionType: Int,
-    var networkSubtype: Int,
-    var maxMsToLive : Int
+    var maxMsToLive: Int,
+    var signalStrength: Int,
+    var linkDnBandwidth: Int,
+    var linkUpBandwidth: Int
 )

@@ -6,17 +6,64 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
-    <Button
-            android:id="@+id/button_check_internet"
-            android:layout_width="wrap_content"
+    <TextView
+            android:id="@+id/tvIsConnected"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@android:color/holo_blue_dark"
-            android:text="@string/check_internet_button"
-            android:textAlignment="center"
+            android:gravity="start"
+            android:padding="20dp"
+            android:textSize="24sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Is connected: YES" />
+
+    <TextView
+            android:id="@+id/tvTransportType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:padding="20dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvIsConnected"
+            tools:text="Transport type: WIFI" />
+
+    <TextView
+            android:id="@+id/tvSignalStrength"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:padding="20dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTransportType"
+            tools:text="Signal strength: -67" />
+
+    <TextView
+            android:id="@+id/tvLinkUpBandwidth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:padding="20dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvSignalStrength"
+            tools:text="LinkUpBandwidth>=11264Kbps" />
+
+    <TextView
+            android:id="@+id/tvLinkDnBandwidth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:padding="20dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvLinkUpBandwidth"
+            tools:text="LinkDnBandwidth>=43008Kbps" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
