@@ -87,19 +87,17 @@ class AppApplication : Application() {
                 maxTimeToLive = -1
                 losingNetwork = null
             }
-            if (aliveNetworks.size == 1) {
-                aliveNetworks.remove(network)
-            }
-            else
-                if (aliveNetworks.size > 1) {
-                    for (aliveNetwork in aliveNetworks) {
-                        if (aliveNetwork == network) {
-                            aliveNetworks.remove(aliveNetwork)
-                            Log.d(TAG, "Method onLost removed: $network, $aliveNetworks")
-                            break
-                        }
+
+            if (aliveNetworks.size > 0) {
+                val toRemove : MutableList<Network> = ArrayList<Network>()
+                for (aliveNetwork in aliveNetworks) {
+                    if (aliveNetwork == network) {
+                        toRemove.add(network)
+                        Log.d(TAG, "Method onLost removed:$toRemove, \n Available networks: $aliveNetworks")
                     }
                 }
+                aliveNetworks.removeAll(toRemove)
+            }
             if (aliveNetworks.size == 0) {
                 isConnected = false
                 maxTimeToLive = -1
@@ -110,7 +108,7 @@ class AppApplication : Application() {
                 linkUpBandwidth = -1
                 deliverEvent()
             }
-            Log.d(TAG, "Method onLost isConnected: $isConnected  $aliveNetworks")
+            Log.d(TAG, "Method onLost isConnected: $isConnected  Available networks: $aliveNetworks")
         }
 
         override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
