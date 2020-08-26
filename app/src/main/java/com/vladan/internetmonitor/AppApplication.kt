@@ -7,6 +7,7 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.util.Log
 import org.greenrobot.eventbus.EventBus
+import kotlin.collections.ArrayList
 
 /**
  * Created by vladan on 7/15/2020
@@ -38,6 +39,8 @@ class AppApplication : Application() {
     private var networkRequest: NetworkRequest? = null
     private var isCurrentNetworkLost: Boolean = false
     private lateinit var wifiManager: WifiManager
+    private var ipV4Address: LinkAddress? = null
+    private var ipV6Address: LinkAddress? = null
 
     private var networkCallback = object : ConnectivityManager.NetworkCallback() {
 
@@ -89,11 +92,14 @@ class AppApplication : Application() {
             }
 
             if (aliveNetworks.size > 0) {
-                val toRemove : MutableList<Network> = ArrayList<Network>()
+                val toRemove: MutableList<Network> = ArrayList<Network>()
                 for (aliveNetwork in aliveNetworks) {
                     if (aliveNetwork == network) {
                         toRemove.add(network)
-                        Log.d(TAG, "Method onLost removed:$toRemove, \n Available networks: $aliveNetworks")
+                        Log.d(
+                            TAG,
+                            "Method onLost to removed: $toRemove"
+                        )
                     }
                 }
                 aliveNetworks.removeAll(toRemove)
@@ -108,14 +114,36 @@ class AppApplication : Application() {
                 linkUpBandwidth = -1
                 deliverEvent()
             }
-            Log.d(TAG, "Method onLost isConnected: $isConnected  Available networks: $aliveNetworks")
+            Log.d(
+                TAG, "Method onLost isConnected: $isConnected  \n Available networks: $aliveNetworks"
+            )
         }
 
         override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
             super.onLinkPropertiesChanged(network, linkProperties)
             if (connectivityDispatcher?.getNetworkCapabilities(network)!!
                     .hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                Log.d(TAG, "Link properties: $linkProperties")
+                Log.d(TAG, "Link cellular properties: $linkProperties")
+            }
+
+            if (connectivityDispatcher?.getNetworkCapabilities(network)!!
+                    .hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+
+                val linkSpeed = wifiManager.connectionInfo.linkSpeed
+                val linkFrequency = wifiManager.connectionInfo.frequency
+                val linkAddresses = linkProperties.linkAddresses
+                defineIpAddress(linkAddresses)
+
+
+                Log.d(
+                    TAG,
+                    "Link WIFI properties: $linkProperties ," +
+                            "\n linkSpeed: $linkSpeed, " +
+                            "\n Link frequency: $linkFrequency" +
+                            "\n v4 ip address: $ipV4Address , " +
+                            "\n v6 ip address: $ipV6Address ," +
+                            "\n Link addresses: $linkAddresses)"
+                )
             }
         }
 
@@ -200,6 +228,19 @@ class AppApplication : Application() {
                     linkUpBandwidth
                 )
             )
+    }
+
+    private fun defineIpAddress(linkAddresses: MutableList<LinkAddress>) {
+
+        for (linkAddress: LinkAddress in linkAddresses) {
+            if ("$linkAddress".contains(".")) {
+                ipV4Address = linkAddress
+            }
+            if ("$linkAddress".contains(":")) {
+                ipV6Address = linkAddress
+            }
+        }
+
     }
 
 }

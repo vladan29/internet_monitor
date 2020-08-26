@@ -6,5 +6,5 @@
     <string name="transport_type_cellular">Transport type: CELLULAR</string>
     <string name="link_up_bandwidth">LinkUpBandwidth>=</string>
     <string name="signal_strength">Signal strength:</string>
-    <string name="link_dn_bandwidth">LinkUpBandwidth>=</string>
+    <string name="link_dn_bandwidth">LinkDnBandwidth>=</string>
 </resources>
