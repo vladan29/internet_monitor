@@ -21,15 +21,3 @@
 #-renamesourcefileattribute SourceFile
 
 ##--------------------Begin: proguard configuration for EventBus------------
-# http://greenrobot.org/eventbus/documentation/proguard/
--keepattributes *Annotation*
--keepclassmembernames class * {
-   @org.greenrobot.eventbus.Subscribe <methods>;
-}
--keep enum org.greenrobot.eventbus.ThreadMode {*;}
-
-# Only required if you use AsyncExecutor
--keepclassmembernames class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent{
-   <init>(java.lang.Throwable);
-}
-##---------------------End: proguard configuration for EventBus------------
