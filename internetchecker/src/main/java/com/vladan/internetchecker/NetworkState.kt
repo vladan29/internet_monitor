@@ -1,9 +1,10 @@
-package com.vladan.internetmonitor
+package com.vladan.internetchecker
 
 /**
- * Created by vladan on 7/17/2020
+ * Created by vladan on 9/30/2020
  */
-data class NetworkState(
+class NetworkState(
+
     var isConnected: Boolean,
     var connectionType: Int,
     var maxMsToLive: Int,
